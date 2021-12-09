@@ -8,4 +8,5 @@ dependencies {
 
     testImplementation(libs.bundles.testImplementation)
     testRuntimeOnly(libs.spek.runner)
+    testImplementation(projects.detektTest)
 }

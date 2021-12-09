@@ -51,6 +51,11 @@ public final class io/github/detekt/tooling/api/DetektProvider$Companion {
 	public static synthetic fun load$default (Lio/github/detekt/tooling/api/DetektProvider$Companion;Ljava/lang/ClassLoader;ILjava/lang/Object;)Lio/github/detekt/tooling/api/DetektProvider;
 }
 
+public final class io/github/detekt/tooling/api/FullQualifiedNameGuesser {
+	public fun <init> (Lorg/jetbrains/kotlin/psi/KtFile;)V
+	public final fun getFullQualifiedName (Ljava/lang/String;)Ljava/util/Set;
+}
+
 public abstract class io/github/detekt/tooling/api/FunctionMatcher {
 	public static final field Companion Lio/github/detekt/tooling/api/FunctionMatcher$Companion;
 	public abstract fun match (Lorg/jetbrains/kotlin/descriptors/CallableDescriptor;)Z
