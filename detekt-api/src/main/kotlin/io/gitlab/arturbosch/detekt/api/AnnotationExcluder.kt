@@ -1,5 +1,6 @@
 package io.gitlab.arturbosch.detekt.api
 
+import io.github.detekt.psi.FullQualifiedNameGuesser
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtFile
 
@@ -16,14 +17,7 @@ class AnnotationExcluder(
         it.removePrefix("*").removeSuffix("*")
     }
 
-    private val resolvedAnnotations = root.importList?.run {
-        imports
-            .asSequence()
-            .filterNot { it.isAllUnder }
-            .mapNotNull { it.importedFqName?.asString() }
-            .map { it.substringAfterLast('.') to it }
-            .toMap()
-    }.orEmpty()
+    private val fullQualifiedNameGuesser = FullQualifiedNameGuesser(root)
 
     @Deprecated("Use AnnotationExclude(KtFile, List<String>) instead")
     constructor(root: KtFile, excludes: SplitPattern) : this(root, excludes.mapAll { it })
@@ -36,8 +30,26 @@ class AnnotationExcluder(
         annotations.firstOrNull(::isExcluded) != null
 
     private fun isExcluded(annotation: KtAnnotationEntry): Boolean {
-        val annotationText = annotation.typeReference?.text ?: return false
-        val value = resolvedAnnotations[annotationText] ?: annotationText
-        return excludes.any { value.contains(it, ignoreCase = true) }
+        val annotationText = annotation.typeReference?.text?.ifEmpty { null } ?: return false
+        /*
+         We can't know if the annotationText is a full qualified name or not. We can have these cases:
+         @Component
+         @Component.Factory
+         @dagger.Component.Factory
+         For that reason we use a heuristic here: If the first character is lower case we assume it's a package name
+         */
+        val possibleNames = if (!annotationText.first().isLowerCase()) {
+            fullQualifiedNameGuesser.getFullQualifiedName(annotationText) + annotationText
+        } else {
+            listOf(
+                annotationText
+                    .split(".")
+                    .dropWhile { it.first().isLowerCase() }
+                    .joinToString(".")
+                    .ifEmpty { annotationText },
+                annotationText
+            )
+        }
+        return excludes.any { exclude -> possibleNames.contains(exclude) }
     }
 }
