@@ -22,7 +22,7 @@ import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
  * </noncompliant>
  * <compliant>
  * data class FewerElements(val a: Int, val b: Int, val c: Int)
- * val (a, b, c) = TooManyElements(1, 2, 3)
+ * val (a, b, c) = FewerElements(1, 2, 3)
  * </compliant>
  */
 class DestructuringDeclarationWithTooManyEntries(config: Config = Config.empty) : Rule(config) {
